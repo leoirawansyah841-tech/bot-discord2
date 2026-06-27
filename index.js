@@ -148,6 +148,16 @@ function formatDuration(seconds) {
 
 // ─── Events ──────────────────────────────────────────────────────────────────
 
+// Tangkap error global dari Discord.js agar bot tidak crash
+client.on('error', (error) => {
+    console.error('Discord Client Error:', error);
+});
+
+// Tangkap unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 // Track voice state changes
 client.on('voiceStateUpdate', (oldState, newState) => {
     const userId = newState.member?.id || oldState.member?.id;
@@ -184,6 +194,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 // Track pesan dan sensor kata kasar
 const badWords = require('./badwords.js');
 const scamWords = require('./scamwords.js');
+const isGibberish = require('./gibberish.js');
 
 function normalizeForFilter(text) {
     return text.normalize('NFKD') // Ubah font aneh (unicode) jadi huruf biasa
@@ -215,11 +226,18 @@ client.on('messageCreate', (message) => {
 
     // 2. Cek Kata Kasar
     const content = normalizeForFilter(message.content);
+    
+    // Cek frasa multi-kata dulu (matching langsung di seluruh konten)
     const hasBadWord = badWords.some(word => {
-        // Escape karakter spesial regex agar kata seperti "kont*l" tidak crash
-        const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const normalizedWord = normalizeForFilter(word);
+        if (normalizedWord.includes(' ')) {
+            // Frasa multi-kata: cek apakah ada di dalam konten
+            return content.includes(normalizedWord);
+        }
+        // Kata tunggal: gunakan word boundary tapi fallback ke includes untuk kata pendek
+        const escapedWord = normalizedWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const spacedWord = escapedWord.split('').join('\\s*');
-        const regex = new RegExp(`\\b${spacedWord}\\b`, 'i');
+        const regex = new RegExp(`(^|\\s|[^a-z])${spacedWord}($|\\s|[^a-z])`, 'i');
         return regex.test(content);
     });
 
@@ -228,6 +246,11 @@ client.on('messageCreate', (message) => {
         message.channel.send(`🤖 **[AI Moderator]** ⚠️ Peringatan untuk ${message.author}: Pesan Anda dihapus secara otomatis karena terdeteksi mengandung kata kasar. Tolong jaga bahasa Anda di server ini!`)
             .then(msg => setTimeout(() => msg.delete().catch(() => {}), 5000));
         return; // Jangan tambahkan ke chat leaderboard
+    }
+
+    // 3. Cek Teks Random / Spam untuk Leaderboard (Opsi B: jangan dihapus, tapi jangan dihitung poin)
+    if (isGibberish(message.content)) {
+        return;
     }
 
     const userId = message.author.id;
@@ -331,131 +354,135 @@ function buildNavRow(page, totalPages, prefix) {
 // ─── Slash Commands Handler ───────────────────────────────────────────────────
 
 client.on('interactionCreate', async (interaction) => {
-    // ── Button: voice leaderboard pagination ──
-    if (interaction.isButton()) {
-        if (
-            interaction.customId.startsWith('vlb_prev_') ||
-            interaction.customId.startsWith('vlb_next_') ||
-            interaction.customId.startsWith('vlb_refresh_')
-        ) {
-            await interaction.deferUpdate();
-            const page = parseInt(interaction.customId.split('_').pop(), 10);
-            const { sorted, totalDetik, activeCount, topSeconds } = buildVoiceData(interaction.guild);
-            const totalPages = Math.ceil(sorted.length / 5);
-            const safePage = Math.max(0, Math.min(page, totalPages - 1));
-            const embed = buildVoiceEmbed(sorted, safePage, totalDetik, activeCount, topSeconds, totalPages);
-            const row = buildNavRow(safePage, totalPages, 'vlb');
-            await interaction.editReply({ embeds: [embed], components: [row] });
+    try {
+        // ── Button: voice leaderboard pagination ──
+        if (interaction.isButton()) {
+            if (
+                interaction.customId.startsWith('vlb_prev_') ||
+                interaction.customId.startsWith('vlb_next_') ||
+                interaction.customId.startsWith('vlb_refresh_')
+            ) {
+                await interaction.deferUpdate();
+                const page = parseInt(interaction.customId.split('_').pop(), 10);
+                const { sorted, totalDetik, activeCount, topSeconds } = buildVoiceData(interaction.guild);
+                const totalPages = Math.ceil(sorted.length / 5);
+                const safePage = Math.max(0, Math.min(page, totalPages - 1));
+                const embed = buildVoiceEmbed(sorted, safePage, totalDetik, activeCount, topSeconds, totalPages);
+                const row = buildNavRow(safePage, totalPages, 'vlb');
+                await interaction.editReply({ embeds: [embed], components: [row] });
+            }
+            return;
         }
-        return;
-    }
 
-    if (!interaction.isChatInputCommand()) return;
+        if (!interaction.isChatInputCommand()) return;
 
-    if (interaction.commandName === 'leaderboard') {
-        await interaction.deferReply();
-        const tipe = interaction.options.getString('tipe');
+        if (interaction.commandName === 'leaderboard') {
+            await interaction.deferReply();
+            const tipe = interaction.options.getString('tipe');
 
-        if (tipe === 'voice') {
-            const { sorted, totalDetik, activeCount, topSeconds } = buildVoiceData(interaction.guild);
+            if (tipe === 'voice') {
+                const { sorted, totalDetik, activeCount, topSeconds } = buildVoiceData(interaction.guild);
 
-            if (sorted.length === 0) {
-                return interaction.editReply({ content: '📭 Belum ada data voice sama sekali.' });
+                if (sorted.length === 0) {
+                    return interaction.editReply({ content: '📭 Belum ada data voice sama sekali.' });
+                }
+
+                const totalPages = Math.ceil(sorted.length / 5);
+                const embed = buildVoiceEmbed(sorted, 0, totalDetik, activeCount, topSeconds, totalPages);
+                const row = buildNavRow(0, totalPages, 'vlb');
+
+                await interaction.editReply({ embeds: [embed], components: totalPages > 1 ? [row] : [] });
+
+            } else if (tipe === 'chat') {
+                const sorted = Object.entries(loadChat())
+                    .sort((a, b) => b[1].count - a[1].count)
+                    .slice(0, 10);
+
+                if (sorted.length === 0) {
+                    return interaction.editReply({ content: '📭 Belum ada data chat sama sekali.' });
+                }
+
+                const topCount = sorted[0][1].count;
+                const totalPesan = sorted.reduce((s, [, d]) => s + d.count, 0);
+
+                const lines = sorted.map(([, data], i) => {
+                    const bar = progressBar(data.count, topCount, 8);
+                    const badge = RANK_BADGE[i] ?? `\`${i + 1}\``;
+                    const pct = ((data.count / totalPesan) * 100).toFixed(1);
+                    return `${badge} **${data.username}**\n> \`${bar}\` ${data.count.toLocaleString()} pesan *(${pct}%)*`;
+                });
+
+                const embed = new EmbedBuilder()
+                    .setColor(0x57F287)
+                    .setTitle('💬  Chat Leaderboard')
+                    .setDescription(
+                        `> Total pesan server: **${totalPesan.toLocaleString()} pesan**\n` +
+                        `\u200b\n` +
+                        lines.join('\n\n')
+                    )
+                    .setFooter({ text: 'Semua channel dihitung  •  Bar = proporsi dari total pesan' })
+                    .setTimestamp();
+
+                await interaction.editReply({ embeds: [embed] });
+            }
+        }
+
+        if (interaction.commandName === 'sesi') {
+            const target = interaction.options.getUser('member') || interaction.user;
+
+            if (target.bot) {
+                return interaction.reply({ content: 'Bot tidak punya sesi voice 😅', ephemeral: true });
             }
 
-            const totalPages = Math.ceil(sorted.length / 5);
-            const embed = buildVoiceEmbed(sorted, 0, totalDetik, activeCount, topSeconds, totalPages);
-            const row = buildNavRow(0, totalPages, 'vlb');
+            const startTime = voiceSessions.get(target.id);
 
-            await interaction.editReply({ embeds: [embed], components: totalPages > 1 ? [row] : [] });
-
-        } else if (tipe === 'chat') {
-            const sorted = Object.entries(loadChat())
-                .sort((a, b) => b[1].count - a[1].count)
-                .slice(0, 10);
-
-            if (sorted.length === 0) {
-                return interaction.editReply({ content: '📭 Belum ada data chat sama sekali.' });
+            if (!startTime) {
+                const isSelf = target.id === interaction.user.id;
+                return interaction.reply({
+                    content: isSelf
+                        ? '❌ Kamu tidak sedang di voice channel. Durasi sesi di-reset saat keluar VC.'
+                        : `❌ **${target.username}** tidak sedang di voice channel.`,
+                    ephemeral: true
+                });
             }
 
-            const topCount = sorted[0][1].count;
-            const totalPesan = sorted.reduce((s, [, d]) => s + d.count, 0);
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const savedSeconds = loadVoice()[target.id]?.totalSeconds || 0;
+            const totalSeconds = savedSeconds + elapsed;
 
-            const lines = sorted.map(([, data], i) => {
-                const bar = progressBar(data.count, topCount, 8);
-                const badge = RANK_BADGE[i] ?? `\`${i + 1}\``;
-                const pct = ((data.count / totalPesan) * 100).toFixed(1);
-                return `${badge} **${data.username}**\n> \`${bar}\` ${data.count.toLocaleString()} pesan *(${pct}%)*`;
-            });
+            const bar = progressBar(elapsed, elapsed + savedSeconds || 1, 12);
 
             const embed = new EmbedBuilder()
-                .setColor(0x57F287)
-                .setTitle('💬  Chat Leaderboard')
+                .setColor(0xFEE75C)
+                .setTitle('⚡  Sesi Voice Aktif')
                 .setDescription(
-                    `> Total pesan server: **${totalPesan.toLocaleString()} pesan**\n` +
-                    `\u200b\n` +
-                    lines.join('\n\n')
+                    `**${target.username}** sedang di voice!\n\u200b`
                 )
-                .setFooter({ text: 'Semua channel dihitung  •  Bar = proporsi dari total pesan' })
+                .addFields(
+                    {
+                        name: '⏱️ Sesi Sekarang',
+                        value: `\`\`\`${formatDuration(elapsed)}\`\`\``,
+                        inline: true
+                    },
+                    {
+                        name: '📊 Total Semua Waktu',
+                        value: `\`\`\`${formatDuration(totalSeconds)}\`\`\``,
+                        inline: true
+                    },
+                    {
+                        name: `Sesi ini`,
+                        value: `\`${bar}\``,
+                        inline: false
+                    }
+                )
+                .setThumbnail(target.displayAvatarURL())
+                .setFooter({ text: 'Sesi di-reset otomatis saat keluar VC' })
                 .setTimestamp();
 
-            await interaction.editReply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed] });
         }
-    }
-
-    if (interaction.commandName === 'sesi') {
-        const target = interaction.options.getUser('member') || interaction.user;
-
-        if (target.bot) {
-            return interaction.reply({ content: 'Bot tidak punya sesi voice 😅', ephemeral: true });
-        }
-
-        const startTime = voiceSessions.get(target.id);
-
-        if (!startTime) {
-            const isSelf = target.id === interaction.user.id;
-            return interaction.reply({
-                content: isSelf
-                    ? '❌ Kamu tidak sedang di voice channel. Durasi sesi di-reset saat keluar VC.'
-                    : `❌ **${target.username}** tidak sedang di voice channel.`,
-                ephemeral: true
-            });
-        }
-
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        const savedSeconds = loadVoice()[target.id]?.totalSeconds || 0;
-        const totalSeconds = savedSeconds + elapsed;
-
-        const bar = progressBar(elapsed, elapsed + savedSeconds || 1, 12);
-
-        const embed = new EmbedBuilder()
-            .setColor(0xFEE75C)
-            .setTitle('⚡  Sesi Voice Aktif')
-            .setDescription(
-                `**${target.username}** sedang di voice!\n\u200b`
-            )
-            .addFields(
-                {
-                    name: '⏱️ Sesi Sekarang',
-                    value: `\`\`\`${formatDuration(elapsed)}\`\`\``,
-                    inline: true
-                },
-                {
-                    name: '📊 Total Semua Waktu',
-                    value: `\`\`\`${formatDuration(totalSeconds)}\`\`\``,
-                    inline: true
-                },
-                {
-                    name: `Sesi ini`,
-                    value: `\`${bar}\``,
-                    inline: false
-                }
-            )
-            .setThumbnail(target.displayAvatarURL())
-            .setFooter({ text: 'Sesi di-reset otomatis saat keluar VC' })
-            .setTimestamp();
-
-        await interaction.reply({ embeds: [embed] });
+    } catch (error) {
+        console.error('Error saat menangani interaksi:', error);
     }
 });
 
