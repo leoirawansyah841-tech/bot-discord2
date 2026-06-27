@@ -216,7 +216,9 @@ client.on('messageCreate', (message) => {
     // 2. Cek Kata Kasar
     const content = normalizeForFilter(message.content);
     const hasBadWord = badWords.some(word => {
-        const spacedWord = word.split('').join('\\s*');
+        // Escape karakter spesial regex agar kata seperti "kont*l" tidak crash
+        const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const spacedWord = escapedWord.split('').join('\\s*');
         const regex = new RegExp(`\\b${spacedWord}\\b`, 'i');
         return regex.test(content);
     });

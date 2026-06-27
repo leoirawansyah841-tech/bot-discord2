@@ -1,40 +1,104 @@
 module.exports = [
     // Indonesia - Hewan
     'anjing', 'anj', 'njing', 'anjg', 'ajg', 'njg', 'anying', 'anjeng', 'anjir', 'anjrit', 'anjay',
-    'babi', 'bb', 'celeng', 
-    'asu', 'asyu',
-    'monyet', 'mnyt', 'kunyuk', 'bajing',
-    
+    'a njing', 'a.njing', 'an.jing', 'anj1ng', 'anj!ng', '@njing', 'anjinh', 'anjingg', 'anjing',
+    'babi', 'bb', 'celeng', 'b4bi', 'bab1', 'b@bi', 'babi', 'babik',
+    'asu', 'asyu', 'asyuu', 'as.u', 'a.su',
+    'monyet', 'mnyt', 'kunyuk', 'bajing', 'monyong', 'monyett', 'monyed',
+    'dancuk', 'dancok', 'jancok', 'jancuk', 'jnck', 'jncuk', 'j4ncuk', 'jank0k',
+    'cuki', 'cukimai', 'cukimay', 'cuk', 'cukk',
+
     // Indonesia - Kotoran/Jorok
     'tai', 'taik', 'tokai', 'eeq', 'pantek', 'kampret', 'ngehe',
+    't4i', 't@i', 'taik', 'taimu', 'taik lo', 'ketaian',
+    'bangke', 'bangkai', 'b4ngke', 'bangkee', 'bngke',
+    'setan', 'syetan', 'set4n', 's3tan', 'iblis', 'ibli5',
+    'keparat', 'kprt', 'k3parat', 'kepar4t',
+    'sialan', 'sial', 'siaalan', 's1al', 'sialn',
+    'bajingan', 'bjngn', 'b4jingan', 'bajingann', 'bajngan',
+    'brengsek', 'brgsek', 'br3ngsek', 'brengseck', 'brngsek',
+    'kurang ajar', 'kurangajar', 'krnj', 'krngajr',
+    'bedebah', 'b3debah', 'bddebah',
+    'bajigur', 'bajigurl',
+    'kampang', 'kmpng',
 
     // Indonesia - Seksual/Alat Kelamin
     'kontol', 'kntl', 'kntol', 'kon', 'ntol', 'kontl',
-    'peler', 'pler', 'biji', 'titit', 
-    'puki', 'pukimak', 'kimak',
-    'memek', 'mmk', 'mek', 'memk', 'pepek', 'ppk', 'itil', 
-    'jembut', 'jmbt', 'jembot', 
-    'tetek', 'toket', 'ttk',
-    
+    'k0ntol', 'k0nt0l', 'kont0l', 'konntol', 'k.o.n.t.o.l',
+    'peler', 'pler', 'biji', 'titit', 'tiit', 't1tit', 'titit',
+    'puki', 'pukimak', 'kimak', 'puk1', 'puk!', 'puk1mak', 'p.u.k.i',
+    'memek', 'mmk', 'mek', 'memk', 'pepek', 'ppk', 'itil',
+    'm3mek', 'm.e.m.e.k', 'mem3k', 'memeq', 'p3pek', 'p.e.p.e.k',
+    'jembut', 'jmbt', 'jembot', 'j3mbut',
+    'tetek', 'toket', 'ttk', 't3tek', 't0ket', 'ttek', 'ttoket',
+    'ngaceng', 'ngaceng', 'ngacer', 'ngac3ng',
+    'susu', 'sus00',
+
     // Indonesia - Aktivitas Seksual
-    'ngentot', 'ngntot', 'ngentd', 'ngntd', 'ngtd', 'ngewe', 'ngwe', 'ngw', 'ewean', 'kenthu', 
+    'ngentot', 'ngntot', 'ngentd', 'ngntd', 'ngtd', 'ngewe', 'ngwe', 'ngw', 'ewean', 'kenthu',
+    'ng3ntot', 'ng3nt0t', 'ngent0t', 'n.g.e.n.t.o.t', 'ngentod', 'ngentod',
+    'ng3we', 'ng.ewe', 'ng3w3', 'ewe', 'ewein', 'diewe',
     'colmek', 'coli', 'sange', 'sangean',
-    
+    'c0lmek', 'c.o.l.m.e.k', 'col1', 's4nge', 'sang3',
+    'githok', 'ranjang', 'entot', 'ent0t',
+
     // Indonesia - Profesi/Hinaan
     'perek', 'prk', 'lonte', 'lont', 'l0nte', 'sundel', 'jablay', 'jbly', 'pelacur', 'openbo', 'ani-ani', 'aniani',
-    'bangsat', 'bgst', 'bgsat', 'bngst', 'bnst', 'bangke', 'bajingan', 'bjngn',
+    'p3rek', 'per3k', 'l0nt3', 'lont3', 'l.o.n.t.e', 'sundal', 'sund4l',
+    'jbl4y', 'jabley', 'j4blay', 'p3lacur', 'pel4cur',
+    'bangsat', 'bgst', 'bgsat', 'bngst', 'bnst',
+    'b4ngsat', 'bang5at', 'b.a.n.g.s.a.t', 'bangzat', 'bangs4t',
     'tolol', 'tll', 'toll', 'goblok', 'gblk', 'goblk', 'gblok', 'bego', 'dungu', 'idiot', 'bodoh', 'geblek', 'pekok',
-    
+    't0lol', 't.o.l.o.l', 'tol0l', 'tololll',
+    'g0blok', 'gobl0k', 'g.o.b.l.o.k', 'goblokk', 'gbl0k',
+    'b3go', 'beg0', 'dungu', 'd.u.n.g.u',
+    'id10t', '1diot', 'idi0t', 'i.d.i.o.t',
+    'b0doh', 'bod0h', 'b.o.d.o.h',
+    'gila', 'gilaa', 'g1la', 'g!la', 'gilak', 'edan',
+    'kafir', 'k4fir', 'kaf1r',
+    'mampus', 'mampos', 'm4mpus',
+    'tai kucing', 'taikucing',
+
     // Inggris - Umum
     'fuck', 'fck', 'fcking', 'fucker', 'motherfucker', 'mf', 'mfs', 'fuk', 'fku',
+    'f.u.c.k', 'fvck', 'phuck', 'fuxk', 'fucc', 'fuk', 'effing', 'fking', 'f2k',
+    'fukk', 'f0ck', 'f0k', 'fack', 'fawk', 'fvk',
     'shit', 'bullshit', 'shitty', 'sh1t',
+    'sh1t', 's.h.i.t', 'sht', 'shyt', 'shiit', 'shitt',
     'bitch', 'bitches', 'sonofabitch', 'b1tch', 'btch',
+    'b!tch', 'b.i.t.c.h', 'bytch', 'biatch', 'beatch', 'bich', 'btich',
     'ass', 'asshole', 'assholes', 'dumbass', 'jackass',
+    '@ss', 'a55', 'a.s.s', '@sshole', 'a55hole', 'dumb@ss', 'jack@ss', 'smartass',
     'dick', 'dickhead', 'cock', 'cocksucker', 'penis', 'vagina',
+    'd1ck', 'd!ck', 'dik', 'd.i.c.k', 'c0ck', 'c.o.c.k', 'kock',
+    'p3nis', 'pen1s', 'p.e.n.i.s', 'v4gina', 'vag1na', 'vag',
     'pussy', 'cunt',
+    'puss1', 'pvssy', 'kunt', 'cvnt',
     'slut', 'whore', 'hooker',
-    'bastard',
-    
+    'slvt', 'wh0re', 'h00ker',
+    'bastard', 'b4stard', 'b@stard', 'bstrd',
+    'damn', 'damm', 'd4mn', 'dammit', 'goddamn',
+    'crap', 'cr4p', 'cr@p',
+    'piss', 'p1ss', 'pissed',
+    'hell', 'wtf', 'stfu', 'gtfo', 'kys',
+    'moron', 'mor0n', 'dumbass', 'dumb', 'stupid', 'stup1d',
+    'loser', 'l0ser', 'luser',
+    'idiot', '1diot', 'id10t',
+    'jerk', 'j3rk', 'jackass',
+
     // Inggris - Slur (Diskriminatif)
-    'nigger', 'nigga', 'faggot', 'fag', 'retard', 'retarded', 'chink', 'spic', 'twat', 'wanker'
+    'nigger', 'nigga', 'faggot', 'fag', 'retard', 'retarded', 'chink', 'spic', 'twat', 'wanker',
+    'n1gger', 'n1gga', 'nigg3r', 'nigg4', 'nig', 'n.i.g.g.e.r',
+    'f4ggot', 'fagg0t', 'f@ggot', 'f4g', 'f.a.g',
+    'r3tard', 'ret4rd', 'r.e.t.a.r.d',
+    'ch1nk', 'sp1c', 'tw@t', 'w4nker',
+    'kike', 'k1ke', 'wetback', 'cracker', 'honky',
+
+    // Gabungan/Campuran Populer
+    'wtaf', 'wtfff', 'omfg', 'stfuu', 'gtfoh',
+    'sontoloyo', 'sontoloy0', 'santoloy',
+    'sempak', 'cebong', 'kadrun', // hinaan politik populer
+    'goblog', 'gobloog', 'g0blog',
+    'gajelas', 'ga jelas', 'gajls',
+    'brengsek', 'brngsek', 'br3ngsek',
 ];
