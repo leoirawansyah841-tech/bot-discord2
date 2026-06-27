@@ -63,7 +63,8 @@ const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.GuildMessages
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent
     ]
 });
 
@@ -180,9 +181,52 @@ client.on('voiceStateUpdate', (oldState, newState) => {
     }
 });
 
-// Track pesan
+// Track pesan dan sensor kata kasar
+const badWords = require('./badwords.js');
+const scamWords = require('./scamwords.js');
+
+function normalizeForFilter(text) {
+    return text.normalize('NFKD') // Ubah font aneh (unicode) jadi huruf biasa
+        .replace(/[\u0300-\u036f]/g, '') // Hapus aksen (combining diacritical marks)
+        .replace(/[\u200B-\u200D\uFEFF]/g, '') // Hapus zero-width spaces
+        .toLowerCase()
+        .replace(/4/g, 'a')
+        .replace(/1|!/g, 'i')
+        .replace(/0/g, 'o')
+        .replace(/3/g, 'e')
+        .replace(/5/g, 's')
+        .replace(/@/g, 'a')
+        .replace(/[.,_\-\*\/\|"']/g, ''); // Hapus tanda baca penyela
+}
+
 client.on('messageCreate', (message) => {
     if (message.author.bot) return;
+
+    // 1. Cek Scam / Phishing
+    const rawContent = message.content.toLowerCase();
+    const isScam = scamWords.some(phrase => rawContent.includes(phrase.toLowerCase()));
+
+    if (isScam) {
+        message.delete().catch(() => {});
+        message.channel.send(`🤖 **[AI Moderator]** 🛡️ Pesan terindikasi penipuan (Scam/Phishing) dari ${message.author} telah diblokir otomatis demi keamanan server.`)
+            .then(msg => setTimeout(() => msg.delete().catch(() => {}), 8000));
+        return; // Hentikan proses
+    }
+
+    // 2. Cek Kata Kasar
+    const content = normalizeForFilter(message.content);
+    const hasBadWord = badWords.some(word => {
+        const spacedWord = word.split('').join('\\s*');
+        const regex = new RegExp(`\\b${spacedWord}\\b`, 'i');
+        return regex.test(content);
+    });
+
+    if (hasBadWord) {
+        message.delete().catch(() => {});
+        message.channel.send(`🤖 **[AI Moderator]** ⚠️ Peringatan untuk ${message.author}: Pesan Anda dihapus secara otomatis karena terdeteksi mengandung kata kasar. Tolong jaga bahasa Anda di server ini!`)
+            .then(msg => setTimeout(() => msg.delete().catch(() => {}), 5000));
+        return; // Jangan tambahkan ke chat leaderboard
+    }
 
     const userId = message.author.id;
     const username = message.author.username;
