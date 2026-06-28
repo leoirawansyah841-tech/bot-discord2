@@ -5,12 +5,12 @@ async function registerCommands(client) {
     const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
     const commandsData = client.commands.map(c => c.data.toJSON());
     try {
-        // Hapus guild commands yang lama agar tidak dobel
-        await rest.put(Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID), { body: [] });
+        // Daftarkan sebagai Guild Commands agar sinkronisasi instan (langsung muncul)
+        await rest.put(Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID), { body: commandsData });
         
-        // Daftarkan sebagai Global Commands (agar muncul di profil bot)
+        // Daftarkan juga sebagai Global Commands (butuh hingga 1 jam untuk muncul di DM/server lain)
         await rest.put(Routes.applicationCommands(client.user.id), { body: commandsData });
-        console.log('Slash commands berhasil didaftarkan secara GLOBAL');
+        console.log('Slash commands berhasil didaftarkan (Guild & Global)');
     } catch (err) {
         console.error('Gagal daftarkan commands:', err);
     }
