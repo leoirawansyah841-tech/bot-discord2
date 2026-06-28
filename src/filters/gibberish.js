@@ -8,8 +8,13 @@ function isGibberish(text) {
     const trimmed = text.trim();
     if (trimmed.length <= 2) return true; // Teks terlalu pendek
 
-    const normalized = trimmed.toLowerCase().replace(/[^a-z]/g, ''); // Ambil huruf saja
-    const cleanFromLaughs = normalized.replace(/(wk|ha|he|hi|hu|ck|xi)+/g, ''); // Abaikan suara tawa
+    // 1. Pembersihan Teks
+    let cleanFromLaughs = text
+        .normalize('NFKD') // Konversi font LingoJam/Fancy Text ke abjad biasa dulu
+        .toLowerCase()
+        .replace(/[^a-z\s]/g, '') // Hanya sisakan huruf dan spasi
+        .replace(/\s+/g, '')     // Gabungkan semua kata
+        .replace(/(wk|ha|he|hi|hu|ck|xi)+/g, ''); // Abaikan suara tawa
     
     if (cleanFromLaughs.length === 0) return false;
     if (cleanFromLaughs.length <= 2) return false;

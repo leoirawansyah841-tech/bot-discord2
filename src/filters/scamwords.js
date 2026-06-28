@@ -1,12 +1,21 @@
 module.exports = [
-    // Nitro Scams
+    // Nitro Scams & Fake Links
     'free nitro',
     'nitro free',
     'get nitro for free',
-    'discord nitro gift', // Hati-hati false positive, tapi scammer sering pakai link palsu
-    'discord-nitro', // Fake domains
-    'dlscord', // Fake domain
-    'discord-app.com/giveaway',
+    'discord nitro gift',
+    'discord-nitro',
+    'dlscord',
+    'dlsccord',
+    'discord-app.com',
+    'discrod',
+    'discord-gift',
+    'nitro-gift',
+    'gift-nitro',
+    'discord.com/billing', // Phishing link
+    'discord-promotions',
+    'discord-gg.com',
+    'discord-events',
 
     // Crypto / Money Scams
     'free crypto',
@@ -22,16 +31,24 @@ module.exports = [
     'send me btc',
     'double your money',
     'crypto casino',
+    'airdrop',
+    'connect wallet',
     
     // Gaming / Other Scams
     'steam 50$',
     'free steam games',
+    'steamcommunity-gifts',
+    'steam-promo',
+    'steam-nitro',
     'free robux',
     'free vbucks',
     'genshin impact free primogems',
+    'valorant free points',
     
     // General Scam Phrases
     'click here to claim',
     'register to get',
-    'promo code'
+    'promo code',
+    'giveaway winner',
+    'you won a prize'
 ];
