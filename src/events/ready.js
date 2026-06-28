@@ -1,38 +1,5 @@
 const { ActivityType, REST, Routes } = require('discord.js');
-const { joinVoiceChannel, entersState, VoiceConnectionStatus } = require('@discordjs/voice');
 const { voiceSessions } = require('../utils/database');
-
-let connection;
-
-function connectVC(client) {
-    const guild = client.guilds.cache.get(process.env.GUILD_ID);
-    if (!guild) return console.log('Guild tidak ditemukan');
-
-    const channel = guild.channels.cache.get(process.env.VOICE_CHANNEL_ID);
-    if (!channel) return console.log('Voice channel tidak ditemukan');
-
-    connection = joinVoiceChannel({
-        channelId: channel.id,
-        guildId: guild.id,
-        adapterCreator: guild.voiceAdapterCreator,
-        selfDeaf: false,
-        selfMute: false
-    });
-
-    console.log('Bot masuk VC');
-
-    connection.on('stateChange', async (_, newState) => {
-        if (newState.status === VoiceConnectionStatus.Disconnected) {
-            console.log('Bot disconnect, reconnecting...');
-            try {
-                await entersState(connection, VoiceConnectionStatus.Signalling, 5_000);
-            } catch {
-                connection.destroy();
-                setTimeout(() => connectVC(client), 3000);
-            }
-        }
-    });
-}
 
 async function registerCommands(client) {
     const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
@@ -52,12 +19,11 @@ module.exports = {
         console.log(`${client.user.tag} online`);
 
         client.user.setPresence({
-            activities: [{ name: '24/7 Voice', type: ActivityType.Watching }],
+            activities: [{ name: 'Moderating Server', type: ActivityType.Watching }],
             status: 'online'
         });
 
         await registerCommands(client);
-        connectVC(client);
 
         // Scan semua voice channel — catat member yang sudah ada di VC sebelum bot nyala
         const guild = client.guilds.cache.get(process.env.GUILD_ID);
@@ -72,9 +38,5 @@ module.exports = {
                     });
                 });
         }
-
-        setInterval(() => {
-            if (!connection) connectVC(client);
-        }, 30000);
     }
 };
