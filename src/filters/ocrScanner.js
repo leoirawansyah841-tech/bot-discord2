@@ -51,7 +51,7 @@ async function scanImageForScam(message) {
 
         if (isScam || isBadWord) {
             message.delete().catch(() => {});
-            message.channel.send(`🤖 **[AI Moderator]** 🛡️ Gambar dari ${message.author} telah diblokir otomatis karena terdeteksi mengandung konten penipuan/judi (Scam) atau kata-kata terlarang.`)
+            message.channel.send(`Gambar dari ${message.author} telah diblokir otomatis karena terdeteksi mengandung konten penipuan/judi (Scam) atau kata-kata terlarang.`)
                 .then(msg => setTimeout(() => msg.delete().catch(() => {}), 8000));
             console.log(`[OCR Filter] Menghapus gambar scam/badword dari ${message.author.username}`);
         }

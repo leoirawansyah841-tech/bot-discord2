@@ -239,7 +239,8 @@ function normalizeHomoglyph(text) {
 // =============================================================================
 /**
  * Menjalankan semua tahap normalisasi secara berurutan pada sebuah kata/teks.
- * Urutan: unicode → leet → homoglyph → strip inserts → remove duplicates → soundalike → lowercase
+ * Urutan: unicode → leet → homoglyph → soundalike → lowercase
+ * (Spasi dipertahankan agar tidak merusak batas antar kata)
  *
  * @param {string} text - Teks input
  * @returns {string} Teks yang sudah dinormalisasi sepenuhnya
@@ -249,8 +250,6 @@ function normalizeAll(text) {
     result = normalizeUnicode(result);
     result = normalizeLeet(result);
     result = normalizeHomoglyph(result);
-    result = stripInserts(result);
-    result = removeDuplicates(result);
     result = normalizeSoundalike(result);
     result = result.toLowerCase();
     return result;

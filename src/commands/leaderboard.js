@@ -39,16 +39,16 @@ function buildVoiceEmbed(sorted, page, totalDetik, activeCount, topSeconds, tota
         const globalRank = page * PER_PAGE + i;
         const bar = progressBar(data.totalSeconds, topSeconds, 8);
         const active = voiceSessions.has(userId) ? ' ⚡' : '';
-        const badge = RANK_BADGE[globalRank] ?? `**${globalRank + 1}.**`;
-        return `${badge} **${data.username}**${active}\n> \`${bar}\` ${formatDuration(data.totalSeconds)}`;
+        const badge = RANK_BADGE[globalRank] ?? `\`#${globalRank + 1}\``;
+        return `${badge} **${data.username}**${active}\n └─ \`${bar}\` **${formatDuration(data.totalSeconds)}**`;
     });
 
     return new EmbedBuilder()
         .setColor(0x5865F2)
         .setTitle('🎙️  Voice Leaderboard')
         .setDescription(
-            `> Total komunitas: **${formatDuration(totalDetik)}** di voice\n` +
-            `> Sedang aktif: **${activeCount} member** ⚡\n` +
+            `> 👥 **Total waktu komunitas:** ${formatDuration(totalDetik)}\n` +
+            `> 🟢 **Member aktif di VC saat ini:** ${activeCount} member\n` +
             `\u200b\n` +
             lines.join('\n\n')
         )
@@ -124,16 +124,16 @@ module.exports = {
 
             const lines = sorted.map(([, data], i) => {
                 const bar = progressBar(data.count, topCount, 8);
-                const badge = RANK_BADGE[i] ?? `\`${i + 1}\``;
+                const badge = RANK_BADGE[i] ?? `\`#${i + 1}\``;
                 const pct = ((data.count / totalPesan) * 100).toFixed(1);
-                return `${badge} **${data.username}**\n> \`${bar}\` ${data.count.toLocaleString()} pesan *(${pct}%)*`;
+                return `${badge} **${data.username}**\n └─ \`${bar}\` **${data.count.toLocaleString()}** pesan *(${pct}%)*`;
             });
 
             const embed = new EmbedBuilder()
                 .setColor(0x57F287)
                 .setTitle('💬  Chat Leaderboard')
                 .setDescription(
-                    `> Total pesan server: **${totalPesan.toLocaleString()} pesan**\n` +
+                    `> 💬 **Total pesan server:** ${totalPesan.toLocaleString()} pesan\n` +
                     `\u200b\n` +
                     lines.join('\n\n')
                 )

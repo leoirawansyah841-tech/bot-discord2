@@ -2,7 +2,17 @@ const { runAllFilters } = require('../filters/messageFilter');
 
 module.exports = {
     name: 'messageUpdate',
-    execute(oldMessage, newMessage) {
+    async execute(oldMessage, newMessage) {
+        // Jika pesan partial (belum ada di cache), fetch dulu
+        if (newMessage.partial) {
+            try {
+                await newMessage.fetch();
+            } catch (error) {
+                console.error('[Embed Filter] Gagal fetch partial message:', error);
+                return;
+            }
+        }
+
         if (newMessage.author && newMessage.author.bot) return;
 
         // Discord sering kali menambahkan "Embeds" (link preview) beberapa detik

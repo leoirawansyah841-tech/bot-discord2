@@ -39,6 +39,20 @@ module.exports = {
                 }
             });
 
+            // Perbaiki thumbnail Spotify yang sering kali hanya logo generik (twitter_card-default)
+            if (!track.thumbnail || track.thumbnail.includes('twitter_card-default')) {
+                try {
+                    const play = require('play-dl');
+                    const searchRes = await play.search(`${track.title} ${track.author}`, { limit: 1 });
+                    if (searchRes && searchRes.length > 0 && searchRes[0].thumbnails) {
+                        const bestThumb = searchRes[0].thumbnails.sort((a, b) => b.width - a.width)[0];
+                        if (bestThumb) track.thumbnail = bestThumb.url;
+                    }
+                } catch (err) {
+                    console.error('[Thumbnail Fetch] Gagal mengambil thumbnail alternatif:', err.message);
+                }
+            }
+
             const embed = new EmbedBuilder()
                 .setColor('#2B2D31')
                 .setAuthor({ name: 'Lagu ditambahkan ke antrian', iconURL: interaction.user.displayAvatarURL() })

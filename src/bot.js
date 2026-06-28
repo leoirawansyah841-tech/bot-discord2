@@ -1,6 +1,6 @@
 require('dotenv').config();
 process.env.FFMPEG_PATH = require('ffmpeg-static');
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Partials } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
@@ -11,7 +11,8 @@ const path = require('path');
             GatewayIntentBits.GuildVoiceStates,
             GatewayIntentBits.GuildMessages,
             GatewayIntentBits.MessageContent
-        ]
+        ],
+        partials: [Partials.Message, Partials.Channel, Partials.Reaction]
     });
 
     // Setup Discord Player
@@ -44,7 +45,13 @@ const path = require('path');
             console.log(`[Bypass] Sukses mengambil stream URL!`);
             
             if (output.entries && output.entries.length > 0) {
+                if (!track.thumbnail || track.thumbnail.includes('twitter_card-default')) {
+                    if (output.entries[0].thumbnail) track.thumbnail = output.entries[0].thumbnail;
+                }
                 return output.entries[0].url;
+            }
+            if (!track.thumbnail || track.thumbnail.includes('twitter_card-default')) {
+                if (output.thumbnail) track.thumbnail = output.thumbnail;
             }
             return output.url;
         } catch (e) {
