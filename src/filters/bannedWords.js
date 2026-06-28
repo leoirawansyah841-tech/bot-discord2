@@ -269,6 +269,25 @@ module.exports = {
     'register to get',
     'promo code',
     'giveaway winner',
-    'you won a prize'
+    'you won a prize',
+    'free nudes',
+    
+    // Judi Online / Slot Scams (Indonesia)
+    'judi slot',
+    'slot gacor',
+    'slot online',
+    'situs judi',
+    'situs slot',
+    'anti rungkad',
+    'slot88',
+    'super cuan',
+    'hoki slot',
+    'maxwin',
+    'rtp live',
+    'zeus slot',
+    'scatter',
+    'deposit pulsa tanpa potongan',
+    'judi bola',
+    'sbobet'
   ]
 };

@@ -1,4 +1,5 @@
 const { runAllFilters } = require('../filters/messageFilter');
+const { scanImageForScam } = require('../filters/ocrScanner');
 const { loadChat, saveChat } = require('../utils/database');
 
 module.exports = {
@@ -6,7 +7,10 @@ module.exports = {
     execute(message, client) {
         if (message.author.bot) return;
 
-        // Jalankan semua filter (Font, Scam, Kasar, Gibberish)
+        // Scan OCR pada gambar (jika ada) berjalan di background
+        scanImageForScam(message);
+
+        // Jalankan semua filter teks dasar (Font, Scam, Kasar)
         const filterResult = runAllFilters(message);
 
         // Jika terdeteksi spam/scam/kata kasar, fungsi runAllFilters akan otomatis 

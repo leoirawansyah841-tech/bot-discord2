@@ -1,5 +1,4 @@
 const { badWords, scamWords } = require('./bannedWords.js');
-const isGibberish = require('./gibberish.js');
 
 const { normalizeAll } = require('./normalize.js');
 
@@ -49,13 +48,7 @@ function runAllFilters(message) {
         return { isValid: false, shouldCount: false };
     }
 
-    // 3. Cek Teks Random / Spam / Keyboard Mashing
-    if (isGibberish(message.content)) {
-        message.delete().catch(() => {});
-        message.channel.send(`🤖 **[AI Moderator]** ⚠️ ${message.author}, tolong jangan spam chat dengan teks acak/keyboard mashing!`)
-            .then(msg => setTimeout(() => msg.delete().catch(() => {}), 5000));
-        return { isValid: false, shouldCount: false };
-    }
+
 
     // Lolos semua filter
     return { isValid: true, shouldCount: true };

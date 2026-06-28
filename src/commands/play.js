@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { useMainPlayer, QueryType } = require('discord-player');
 
 module.exports = {
@@ -39,10 +39,16 @@ module.exports = {
                 }
             });
 
-            return interaction.editReply(`🎵 Berhasil menambahkan **${track.title}** oleh **${track.author}** ke antrian!`);
+            const embed = new EmbedBuilder()
+                .setColor('#2B2D31')
+                .setAuthor({ name: 'Lagu ditambahkan ke antrian', iconURL: interaction.user.displayAvatarURL() })
+                .setDescription(`**[${track.title}](${track.url})**\nOleh: **${track.author}**`)
+                .setThumbnail(track.thumbnail || null);
+
+            return interaction.editReply({ content: '', embeds: [embed] });
         } catch (e) {
             console.error(e);
-            return interaction.editReply('❌ Lagu tidak ditemukan. Coba:\n• Tulis nama lagu lebih lengkap\n• Paste link SoundCloud atau Spotify langsung');
+            return interaction.editReply({ content: '❌ Lagu tidak ditemukan. Coba:\n• Tulis nama lagu lebih lengkap\n• Paste link SoundCloud atau Spotify langsung', flags: 64 });
         }
     },
 };
