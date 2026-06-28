@@ -1,23 +1,7 @@
-const badWords = require('./badwords.js');
-const scamWords = require('./scamwords.js');
+const { badWords, scamWords } = require('./bannedWords.js');
 const isGibberish = require('./gibberish.js');
 
-function normalizeForFilter(text) {
-    if (!text) return '';
-    return text.normalize('NFKD') // Ubah font aneh (unicode) dari web seperti LingoJam jadi huruf biasa
-        .replace(/[\u0300-\u036f]/g, '') // Hapus aksen (combining diacritical marks)
-        .replace(/[\u200B-\u200D\uFEFF]/g, '') // Hapus zero-width spaces
-        .toLowerCase()
-        .replace(/[4@]/g, 'a')
-        .replace(/[1!\|]/g, 'i')
-        .replace(/[0о⊙]/g, 'o') // o, cyrillic o, circled dot
-        .replace(/[3єеεə]/g, 'e') // e, cyrillic e, greek epsilon, schwa
-        .replace(/[5$]/g, 's')
-        .replace(/[ягʀ]/g, 'r') // cyrillic ya, cyrillic ge, latin small capital r
-        .replace(/[пиŋ]/g, 'n') // cyrillic pe, cyrillic i, latin eng
-        .replace(/[т]/g, 't') // cyrillic te
-        .replace(/[^a-z0-9\s]/g, ''); // Hapus SEMUA simbol, emoji, kurung, dan tanda baca!
-}
+const { normalizeAll } = require('./normalize.js');
 
 // Fungsi utama filter
 // Mengembalikan { isValid: boolean, shouldCount: boolean }
@@ -32,9 +16,9 @@ function runAllFilters(message) {
     }
 
     // 1. Cek Scam / Phishing
-    const normalizedContentForScam = normalizeForFilter(message.content).replace(/\s+/g, '');
+    const normalizedContentForScam = normalizeAll(message.content).replace(/\s+/g, '');
     const isScam = scamWords.some(phrase => {
-        const normalizedPhrase = normalizeForFilter(phrase).replace(/\s+/g, '');
+        const normalizedPhrase = normalizeAll(phrase).replace(/\s+/g, '');
         return normalizedContentForScam.includes(normalizedPhrase);
     });
 
@@ -46,9 +30,9 @@ function runAllFilters(message) {
     }
 
     // 2. Cek Kata Kasar
-    const content = normalizeForFilter(message.content);
+    const content = normalizeAll(message.content);
     const hasBadWord = badWords.some(word => {
-        const normalizedWord = normalizeForFilter(word);
+        const normalizedWord = normalizeAll(word);
         if (normalizedWord.includes(' ')) {
             return content.includes(normalizedWord);
         }
@@ -65,9 +49,12 @@ function runAllFilters(message) {
         return { isValid: false, shouldCount: false };
     }
 
-    // 3. Cek Teks Random / Spam untuk Leaderboard (Jangan dihapus, tapi jangan dihitung poin)
+    // 3. Cek Teks Random / Spam / Keyboard Mashing
     if (isGibberish(message.content)) {
-        return { isValid: true, shouldCount: false };
+        message.delete().catch(() => {});
+        message.channel.send(`🤖 **[AI Moderator]** ⚠️ ${message.author}, tolong jangan spam chat dengan teks acak/keyboard mashing!`)
+            .then(msg => setTimeout(() => msg.delete().catch(() => {}), 5000));
+        return { isValid: false, shouldCount: false };
     }
 
     // Lolos semua filter
@@ -75,6 +62,5 @@ function runAllFilters(message) {
 }
 
 module.exports = {
-    normalizeForFilter,
     runAllFilters
 };

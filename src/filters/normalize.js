@@ -222,12 +222,24 @@ function normalizeSoundalike(text) {
         .replace(/v/gi, 'f');     // vuck → fuck
 }
 
+function normalizeHomoglyph(text) {
+    return text.normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '') // Hapus aksen (combining diacritical marks)
+        .replace(/[\u200B-\u200D\uFEFF]/g, '') // Hapus zero-width spaces
+        .replace(/[о⊙]/g, 'o') // o, cyrillic o, circled dot
+        .replace(/[єеεə]/g, 'e') // e, cyrillic e, greek epsilon, schwa
+        .replace(/[ягʀ]/g, 'r') // cyrillic ya, cyrillic ge, latin small capital r
+        .replace(/[пиŋ]/g, 'n') // cyrillic pe, cyrillic i, latin eng
+        .replace(/[т]/g, 't') // cyrillic te
+        .replace(/[^a-z0-9\s]/gi, ''); // Hapus semua sisa simbol, emoji, tanda baca yang tidak penting
+}
+
 // =============================================================================
 // Pipeline Utama: normalizeAll
 // =============================================================================
 /**
  * Menjalankan semua tahap normalisasi secara berurutan pada sebuah kata/teks.
- * Urutan: unicode → leet → strip inserts → remove duplicates → soundalike → lowercase
+ * Urutan: unicode → leet → homoglyph → strip inserts → remove duplicates → soundalike → lowercase
  *
  * @param {string} text - Teks input
  * @returns {string} Teks yang sudah dinormalisasi sepenuhnya
@@ -236,6 +248,7 @@ function normalizeAll(text) {
     let result = text;
     result = normalizeUnicode(result);
     result = normalizeLeet(result);
+    result = normalizeHomoglyph(result);
     result = stripInserts(result);
     result = removeDuplicates(result);
     result = normalizeSoundalike(result);
@@ -246,6 +259,7 @@ function normalizeAll(text) {
 module.exports = {
     normalizeUnicode,
     normalizeLeet,
+    normalizeHomoglyph,
     stripInserts,
     removeDuplicates,
     normalizeSoundalike,

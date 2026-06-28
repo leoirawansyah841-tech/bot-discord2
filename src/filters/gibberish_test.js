@@ -8,24 +8,25 @@ function isGibberish(text) {
     const trimmed = text.trim();
     if (trimmed.length <= 2) return true;
 
-    // Dedup awal untuk hapus ketawa panjang
+    // 1. Pembersihan Teks
+    // Dedup dulu sebelum hapus ketawa supaya "wkwkwkkwkw" jadi "wkwkwkwkw" dan terhapus
     let deduplicatedForLaughs = text.toLowerCase().replace(/(.)\1{2,}/g, '$1$1');
-    
-    // Hapus ketawa
-    let textWithoutLaughs = deduplicatedForLaughs
+    let cleanFromLaughs = deduplicatedForLaughs
         .normalize('NFKD')
+        .replace(/[^a-z\s]/g, '')
+        .replace(/\s+/g, '')
         .replace(/(wkwk|wk|haha|hihi|huhu|hehe|ckck|xixi)+/g, '');
 
-    // Hanya ambil huruf dan spasi, hapus simbol
-    let cleanText = textWithoutLaughs.replace(/[^a-z\s]/g, '');
-    let words = cleanText.split(/\s+/).filter(w => w.length > 0);
+    if (cleanFromLaughs.length === 0) return false;
+    if (cleanFromLaughs.length <= 2) return false;
 
-    if (words.length === 0) return false;
+    // Dedup lagi setelah dibersihkan
+    const deduplicated = cleanFromLaughs.replace(/(.)\1+/g, '$1'); // aabbcc -> abc untuk cek rasio dan berderet
 
     let gibberishScore = 0;
 
     // ─────────────────────────────────────────
-    // 2. Bigram Mustahil & Pola Keyboard (Cek Per Kata!)
+    // 2. Bigram Mustahil (diperluas)
     // ─────────────────────────────────────────
     const impossibleBigrams = [
         'bx','cj','cv','cx','dx','fq','fx','gq','gx','hx',
@@ -36,7 +37,7 @@ function isGibberish(text) {
         'bq','bf','bz','cf','cg','cp','dj','dq','dv','dw','dz',
         'fj','fk','fp','fv','fw','gb','gj','gv','gw',
         'hj','hq','hv','hz','jb','jd','jh','jk','jl','jm','jn','jp','jr','jt','ju',
-        'kb','kc','kj','kv','lq','lx','lz',
+        'kb','kc','kj','kv','kw','lq','lx','lz',
         'mj','mq','mv','mw','mz','nq','nv','nx','nz',
         'pb','pd','pf','pg','pj','pk','pm','pn','pq','pv','pw',
         'rb','rc','rd','rf','rg','rh','rj','rk','rl','rm','rp','rq','rr','rv','rw','rx','rz',
@@ -48,6 +49,16 @@ function isGibberish(text) {
         'zb','zc','zd','ze','zf','zg','zh','zi','zk','zl','zm','zn','zo','zp','zr','zs','zt','zu','zv','zw','zy','zz',
     ];
 
+    for (const bigram of impossibleBigrams) {
+        if (deduplicated.includes(bigram)) {
+            gibberishScore += ; console.log('Score + at line', new Error().stack.split('\\n')[1].match(/:(\d+):/)[1]);
+            break; // Satu bigram mustahil sudah cukup jadi bukti kuat
+        }
+    }
+
+    // ─────────────────────────────────────────
+    // 3. Pola Keyboard Mashing
+    // ─────────────────────────────────────────
     const keyboardPatterns = [
         'qwer','wert','erty','rtyu','tyui','yuio','uiop',
         'asdf','sdfg','dfgh','fghj','ghjk','hjkl',
@@ -57,89 +68,67 @@ function isGibberish(text) {
         'lkjh','mnbv','poiu'
     ];
 
-    let hasImpossibleBigram = false;
-    let hasKeyboardPattern = false;
-
-    for (let word of words) {
-        let dedupWord = word.replace(/(.)\1+/g, '$1');
-        
-        for (const bigram of impossibleBigrams) {
-            if (dedupWord.includes(bigram)) {
-                hasImpossibleBigram = true;
-                break;
-            }
-        }
-        
-        for (const pattern of keyboardPatterns) {
-            if (dedupWord.includes(pattern)) {
-                hasKeyboardPattern = true;
-                break;
-            }
+    for (const pattern of keyboardPatterns) {
+        if (deduplicated.includes(pattern)) {
+            gibberishScore += ; console.log('Score + at line', new Error().stack.split('\\n')[1].match(/:(\d+):/)[1]);
         }
     }
 
-    if (hasImpossibleBigram) gibberishScore += 3;
-    if (hasKeyboardPattern) gibberishScore += 3;
-
     // ─────────────────────────────────────────
-    // 3. Karakter Berulang Ekstrem (Cek per kata)
+    // 4. Karakter Berulang Ekstrem
     // ─────────────────────────────────────────
-    let hasExtremeRepeat = false;
-    for (let word of words) {
-        if (/(.)\1{4,}/.test(word)) {
-            hasExtremeRepeat = true; 
-        }
+    if (/(.)\1{4,}/.test(cleanFromLaughs)) {
+        gibberishScore += ; console.log('Score + at line', new Error().stack.split('\\n')[1].match(/:(\d+):/)[1]); // aaaaa
     }
-    if (hasExtremeRepeat) gibberishScore += 2;
 
-    // Variasi huruf sedikit (Cek pada kalimat utuh tanpa spasi)
-    let cleanNoSpace = cleanText.replace(/\s+/g, '');
-    if (cleanNoSpace.length > 7) {
-        const uniqueChars = new Set(cleanNoSpace.split(''));
+    if (cleanFromLaughs.length > 7) {
+        const uniqueChars = new Set(cleanFromLaughs.split(''));
         if (uniqueChars.size <= 3) {
-            gibberishScore += 4; 
+            gibberishScore += ; console.log('Score + at line', new Error().stack.split('\\n')[1].match(/:(\d+):/)[1]); 
         } else if (uniqueChars.size <= 4) {
-            gibberishScore += 2; 
+            gibberishScore += ; console.log('Score + at line', new Error().stack.split('\\n')[1].match(/:(\d+):/)[1]); 
         }
     }
 
     // ─────────────────────────────────────────
-    // 4. Rasio Vokal vs Konsonan
+    // 5. Rasio Vokal vs Konsonan
     // ─────────────────────────────────────────
-    const deduplicatedNoSpace = cleanNoSpace.replace(/(.)\1+/g, '$1');
-    const withoutDigraphs = deduplicatedNoSpace.replace(/(ng|ny|sy|kh|pr|tr|kr|gr)/g, 'c');
+    // Hitung konsonan dengan menganggap digraph (ng, ny) sebagai 1 konsonan
+    const withoutDigraphs = deduplicated.replace(/(ng|ny|sy|kh|pr|tr|kr|gr)/g, 'c');
     const vowelsCount = (withoutDigraphs.match(/[aeiou]/g) || []).length;
     const consonantsCount = withoutDigraphs.length - vowelsCount;
 
     if (withoutDigraphs.length > 4) { 
         if (vowelsCount === 0) {
-            gibberishScore += 4; 
+            gibberishScore += ; console.log('Score + at line', new Error().stack.split('\\n')[1].match(/:(\d+):/)[1]); 
         } else {
             const ratio = consonantsCount / vowelsCount;
             if (ratio > 4) { 
-                gibberishScore += 3; 
+                gibberishScore += ; console.log('Score + at line', new Error().stack.split('\\n')[1].match(/:(\d+):/)[1]); 
             } else if (ratio < 0.2) { 
-                gibberishScore += 3;
+                gibberishScore += ; console.log('Score + at line', new Error().stack.split('\\n')[1].match(/:(\d+):/)[1]);
             }
         }
     }
 
     // ─────────────────────────────────────────
-    // 5. Konsonan Berderet
+    // 6. Konsonan Berderet
     // ─────────────────────────────────────────
-    if (/[bcdfghjklmnpqrstvwxyz]{5,}/.test(withoutDigraphs)) {
-        gibberishScore += 3; 
-    } else if (/[bcdfghjklmnpqrstvwxyz]{4,}/.test(withoutDigraphs)) {
-        gibberishScore += 1;
+    // Cek pada string yang digraph-nya sudah disingkat
+    if (/[bcdfghjklmnpqrstvwxyz]{4,}/.test(withoutDigraphs)) {
+        gibberishScore += ; console.log('Score + at line', new Error().stack.split('\\n')[1].match(/:(\d+):/)[1]); 
+    } else if (/[bcdfghjklmnpqrstvwxyz]{3,}/.test(withoutDigraphs)) {
+        gibberishScore += ; console.log('Score + at line', new Error().stack.split('\\n')[1].match(/:(\d+):/)[1]);
     }
 
     // ─────────────────────────────────────────
-    // 6. Panjang teks ekstrem
+    // 7. Panjang teks ekstrem
     // ─────────────────────────────────────────
-    if (cleanNoSpace.length > 20) {
-        gibberishScore += 1;
+    if (cleanFromLaughs.length > 20) {
+        gibberishScore += ; console.log('Score + at line', new Error().stack.split('\\n')[1].match(/:(\d+):/)[1]);
     }
 
+    // Threshold tetap 3, karena bobot penalti sudah disesuaikan agar lebih akurat
     return gibberishScore >= 3;
 }
 
